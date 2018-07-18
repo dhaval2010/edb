@@ -1,0 +1,953 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.edb.samples</groupId>
+	<artifactId>example</artifactId>
+	<packaging>war</packaging>
+	<version>1.0</version>
+	<name>example</name>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<!-- JBoss dependency versions -->
+		<version.jboss.maven.plugin>7.4.Final</version.jboss.maven.plugin>
+		<!-- Define the version of the JBoss BOMs we want to import to specify 
+			tested stacks. -->
+		<!-- Certified version of the JBoss EAP components we want to use -->
+		<version.jboss.bom>1.0.4.Final-redhat-4</version.jboss.bom>
+		<!-- other plugin versions -->
+		<version.surefire.plugin>2.10</version.surefire.plugin>
+		<version.war.plugin>2.1.1</version.war.plugin>
+		<!-- Added N -->
+		<version.infinispan>5.2.7.Final</version.infinispan>
+		<cxf.version>2.7.12</cxf.version>
+		<!-- maven-compiler-plugin -->
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<maven.compiler.source>1.8</maven.compiler.source>
+
+		<skipTests>false</skipTests>
+		<project.version>1.1.13.Final</project.version>
+
+		<mockito.version>1.9.0-rc1</mockito.version>
+		<jacoco.version>0.7.5.201505241946</jacoco.version>
+		<jacoco.ut.execution.data.file>${project.build.directory}/jacocoarq.exec</jacoco.ut.execution.data.file>
+		<jacoco.ut.execution.data.file.2>${project.build.directory}/jacocopojo.exec</jacoco.ut.execution.data.file.2>
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.jboss.bom</groupId>
+				<artifactId>jboss-javaee-6.0-with-tools</artifactId>
+				<version>${version.jboss.bom}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.bom</groupId>
+				<artifactId>jboss-javaee-6.0-with-hibernate</artifactId>
+				<version>${version.jboss.bom}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.shrinkwrap.resolver</groupId>
+				<artifactId>shrinkwrap-resolver-bom</artifactId>
+				<version>2.0.0</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.jboss.arquillian.extension</groupId>
+				<artifactId>arquillian-transaction-bom</artifactId>
+				<version>1.0.4</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<dependencies>
+		<!-- Import the CDI API, we use provided scope as the API is included in 
+			JBoss AS 7 -->
+		<dependency>
+			<groupId>javax.enterprise</groupId>
+			<artifactId>cdi-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- Import the Common Annotations API (JSR-250), we use provided scope 
+			as the API is included in JBoss AS 7 -->
+		<dependency>
+			<groupId>org.jboss.spec.javax.annotation</groupId>
+			<artifactId>jboss-annotations-api_1.1_spec</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- Import the JAX-RS API, we use provided scope as the API is included 
+			in JBoss AS 7 -->
+		<dependency>
+			<groupId>org.jboss.spec.javax.ws.rs</groupId>
+			<artifactId>jboss-jaxrs-api_1.1_spec</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- Import the JPA API, we use provided scope as the API is included in 
+			JBoss AS 7 -->
+		<dependency>
+			<groupId>org.hibernate.javax.persistence</groupId>
+			<artifactId>hibernate-jpa-2.0-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- Import the EJB API, we use provided scope as the API is included in 
+			JBoss AS 7 -->
+		<dependency>
+			<groupId>org.jboss.spec.javax.ejb</groupId>
+			<artifactId>jboss-ejb-api_3.1_spec</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- JSR-303 (Bean Validation) Implementation -->
+		<!-- Provides portable constraints such as @Email -->
+		<!-- Hibernate Validator is shipped in JBoss AS 7 -->
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-validator</artifactId>
+			<scope>provided</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<!-- Import the JSF API, we use provided scope as the API is included in 
+			JBoss AS 7 -->
+		<dependency>
+			<groupId>org.jboss.spec.javax.faces</groupId>
+			<artifactId>jboss-jsf-api_2.1_spec</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- Added to add the dependency for javax.faces.webapp.UIComponentELTag -->
+		<dependency>
+			<groupId>javax.servlet.jsp</groupId>
+			<artifactId>jsp-api</artifactId>
+			<version>2.1</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- Now we declare any tools needed -->
+
+		<!-- Annotation processor to generate the JPA 2.0 metamodel classes for 
+			typesafe criteria queries -->
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-jpamodelgen</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- Annotation processor that raising compilation errors whenever constraint 
+			annotations are incorrectly used. -->
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-validator-annotation-processor</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		
+		<!-- <dependency>
+			<groupId>com.edb</groupId>
+			<artifactId>edb</artifactId>
+			<version>1.0</version>
+			<scope>system</scope>
+			<systemPath>${basedir}/libs/edb-jdbc18.jar</systemPath>
+		</dependency> -->
+
+		<!-- Needed for running tests (you may also use TestNG) -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- For JSF taglib -->
+		<dependency>
+			<groupId>javax.el</groupId>
+			<artifactId>el-api</artifactId>
+			<version>2.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>1.3.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-fileupload</groupId>
+			<artifactId>commons-fileupload</artifactId>
+			<version>1.2.1</version>
+		</dependency>
+
+		<!-- For JSF taglib -->
+
+		<dependency>
+			<groupId>org.jboss.arquillian.junit</groupId>
+			<artifactId>arquillian-junit-container</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jboss.arquillian.protocol</groupId>
+			<artifactId>arquillian-protocol-servlet</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- For Vulnerability -->
+		<dependency>
+			<groupId>org.owasp.antisamy</groupId>
+			<artifactId>antisamy</artifactId>
+			<version>1.5.3</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jboss.spec.javax.servlet</groupId>
+			<artifactId>jboss-servlet-api_3.0_spec</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+			<version>2.6-redhat-2</version>
+			<!-- scope>runtime</scope> -->
+		</dependency>
+
+		<!-- GZIP Compression -->
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-jdk14</artifactId>
+			<version>1.6.4</version>
+		</dependency>
+
+		<dependency>
+		            <artifactId>jboss-logging</artifactId>
+		            <groupId>org.jboss.logging</groupId>            
+		            <version>3.2.0.Final</version>
+		 </dependency>
+
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-annotations</artifactId>
+			<version>3.5.6-FINAL</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.hibernate</groupId>
+					<artifactId>hibernate-core</artifactId>
+				</exclusion>
+				<exclusion>
+		            <groupId>org.jboss.logging</groupId>
+		            <artifactId>jboss-logging</artifactId>
+		        </exclusion>
+
+				<exclusion>
+					<groupId>org.hibernate</groupId>
+					<artifactId>hibernate-commons-annotations</artifactId>
+				</exclusion>
+
+				<exclusion>
+					<groupId>org.hibernate.javax.persistence</groupId>
+					<artifactId>hibernate-jpa-2.0-api</artifactId>
+				</exclusion>
+
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<!-- GZIP Compression -->
+
+		<!-- For Excel generation -->
+		<dependency>
+			<groupId>jboss</groupId>
+			<artifactId>jbosssx</artifactId>
+			<version>3.2.3</version>
+		</dependency>
+
+		<!-- JasperReports -->
+		<dependency>
+			<groupId>commons-beanutils</groupId>
+			<artifactId>commons-beanutils</artifactId>
+			<version>1.8.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-collections</groupId>
+			<artifactId>commons-collections</artifactId>
+			<version>3.2.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-digester</groupId>
+			<artifactId>commons-digester</artifactId>
+			<version>2.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+			<version>1.1</version>
+		</dependency>
+
+
+		<!-- For using JSON objects in java. -->
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.2.4</version>
+		</dependency>
+
+		<!-- CXF jars start -->
+		<dependency>
+			<groupId>org.apache.ws.security</groupId>
+			<artifactId>wss4j</artifactId>
+			<version>1.6.9-redhat-2</version>
+			<!-- provided</scope> -->
+		</dependency>
+		<dependency>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-rt-frontend-jaxws</artifactId>
+			<version>${cxf.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-rt-transports-http</artifactId>
+			<version>${cxf.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-rt-ws-security</artifactId>
+			<version>${cxf.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.lowagie</groupId>
+			<artifactId>itext</artifactId>
+			<version>2.1.7</version>
+		</dependency>
+		<dependency>
+			<groupId>opensymphony</groupId>
+			<artifactId>quartz</artifactId>
+			<version>1.6.3</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.codehaus.jettison</groupId>
+			<artifactId>jettison</artifactId>
+			<version>1.3</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.sun.jersey</groupId>
+			<artifactId>jersey-core</artifactId>
+			<version>1.8</version>
+		</dependency>
+
+		<!-- Start : Dependancies for unit testing -->
+
+
+
+
+
+
+		<dependency>
+			<groupId>org.jboss.arquillian.extension</groupId>
+			<artifactId>arquillian-transaction-jta</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jboss.arquillian.extension</groupId>
+			<artifactId>arquillian-transaction-api</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jboss.shrinkwrap.resolver</groupId>
+			<artifactId>shrinkwrap-resolver-bom</artifactId>
+			<version>2.0.0</version>
+			<type>pom</type>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jboss.shrinkwrap.resolver</groupId>
+			<artifactId>shrinkwrap-resolver-depchain</artifactId>
+			<type>pom</type>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jboss.weld</groupId>
+			<artifactId>weld-api</artifactId>
+			<version>1.1.Final</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+		    <groupId>org.mockito</groupId>
+		    <artifactId>mockito-all</artifactId>
+		    <version>1.9.5</version>
+		    <scope>test</scope>
+		</dependency>
+		<!-- End : Dependancies for unit testing end -->
+	</dependencies>
+
+	<build>
+		<!-- Maven will append the version to the finalName (which is the name 
+			given to the generated war, and hence the context root) -->
+		<finalName>${project.artifactId}</finalName>
+
+		<plugins>
+
+			<plugin>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>${version.war.plugin}</version>
+				<configuration>
+					<!-- Java EE 6 doesn't require web.xml, Maven needs to catch up! -->
+					<failOnMissingWebXml>false</failOnMissingWebXml>
+				</configuration>
+			</plugin>
+			<!-- The JBoss AS plugin deploys your war to a local JBoss AS container -->
+			<!-- To use, run: mvn package jboss-as:deploy -->
+			<plugin>
+				<groupId>org.jboss.as.plugins</groupId>
+				<artifactId>jboss-as-maven-plugin</artifactId>
+				<version>${version.jboss.maven.plugin}</version>
+			</plugin>
+
+			<plugin>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.20</version>
+			</plugin>
+
+			<!-- <plugin> <groupId>net.alchim31.maven</groupId> <artifactId>yuicompressor-maven-plugin</artifactId> 
+				<configuration> <sourceDirectory>${basedir}/src/main/webapp/resources/uiframework/jquery</sourceDirectory> 
+				<nosuffix>true</nosuffix> <force>true</force> <excludeResources>${basedir}/src/main/webapp/resources/js/jquery.cleditor.js</excludeResources> 
+				<excludes> <exclude>**/js/jquery.cleditor.js</exclude> <exclude>${basedir}/src/main/webapp/resources/uiframework/jquery/jquery.blockUI.js</exclude> 
+				</excludes> <outputDirectory>${basedir}/src/main/webapp/resources/uiframework/jquery</outputDirectory> 
+				</configuration> <executions> <execution> <goals> <goal>compress</goal> </goals> 
+				</execution> </executions> </plugin> -->
+
+		</plugins>
+
+	</build>
+
+	<profiles>
+		<profile>
+			<!-- The default profile skips all tests, though you can tune it to run 
+				just unit tests based on a custom pattern -->
+			<!-- Seperate profiles are provided for running all tests, including Arquillian 
+				tests that execute in the specified container -->
+			<id>default</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<version>${version.surefire.plugin}</version>
+						<configuration>
+							<skip>true</skip>
+							<skipTests>${skipTests}</skipTests>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
+		<profile>
+			<!-- An optional Arquillian testing profile that executes tests in a remote 
+				JBoss AS instance -->
+			<!-- Run with: mvn clean test -Parq-jbossas-remote -->
+			<id>arq-jbossas-remote</id>
+			<dependencies>
+				<dependency>
+					<groupId>org.jboss.as</groupId>
+					<artifactId>jboss-as-arquillian-container-remote</artifactId>
+					<scope>test</scope>
+				</dependency>
+			</dependencies>
+		</profile>
+
+
+		<!-- ********************** -->
+		<!-- Author : Dhaval Patel Description : Below profile is intended for 
+			execution on jenkins, it includes code coverage , reporting and download 
+			jboss as features. Sample maven command : mvn clean test jacoco:merge -Pjenkins-unit-testing -->
+		<!-- 22-01-2018 - OJDBC Jar to be added externally issue resolved -->
+		<profile>
+			<id>jenkins-unit-testing</id>
+			<build>
+				<plugins>
+
+					<!-- Below plugin downloads jboss as as dependancy. -->
+					<plugin>
+						<artifactId>maven-dependency-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>unpack</id>
+								<phase>process-test-classes</phase>
+								<goals>
+									<goal>unpack</goal>
+								</goals>
+								<configuration>
+									<artifactItems>
+										<artifactItem>
+											<groupId>org.jboss.as</groupId>
+											<artifactId>jboss-as-dist</artifactId>
+											<version>7.5.7.Final-redhat-3</version>
+											<type>zip</type>
+											<overWrite>true</overWrite>
+											<outputDirectory>${basedir}/target</outputDirectory>
+										</artifactItem>
+									</artifactItems>
+								</configuration>
+							</execution>
+
+							<execution>
+								<id>copy</id>
+								<phase>process-test-classes</phase>
+								<goals>
+									<goal>copy</goal>
+								</goals>
+								<configuration>
+									<artifactItems>
+										<artifactItem>
+											<groupId>com.edb</groupId>
+											<artifactId>edb</artifactId>
+											<version>1.0</version>
+											<scope>system</scope>
+											<systemPath>${basedir}/libs/edb-jdbc18.jar</systemPath>
+											<type>jar</type>
+											<overWrite>true</overWrite>
+											<outputDirectory>${basedir}/target/jboss-eap-6.4/modules/com/oracle/ojdbc/main</outputDirectory>
+											<destFileName>ojdbc6.jar</destFileName>
+										</artifactItem>
+									</artifactItems>
+									<overWriteReleases>false</overWriteReleases>
+									<overWriteSnapshots>true</overWriteSnapshots>
+								</configuration>
+							</execution>
+
+						</executions>
+					</plugin>
+
+
+					<!-- Below plugin copies jboss configuration files such as standalone.xml. -->
+					<plugin>
+						<artifactId>maven-resources-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>copy-resources</id>
+								<phase>process-test-classes</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${basedir}/target/jboss-eap-6.4</outputDirectory>
+									<overwrite>true</overwrite>
+									<resources>
+										<resource>
+											<directory>${basedir}/src/test/resources/jboss</directory>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<!-- This plugin is mendatory for unit test cases to run. Here you can 
+						specify which classes to run. -->
+					<plugin>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<version>2.20</version>
+						<configuration>
+							<forkCount>3</forkCount>
+							<reuseForks>true</reuseForks>
+							<argLine>-Xmx1024m</argLine>
+							<skip>false</skip>
+							<argLine>${surefireArgLine}</argLine>
+
+							<!-- asm dependancy required to be excluded in order for jacoco to 
+								work. -->
+							<classpathDependencyExcludes>
+								<classpathDependencyExcludes>asm:asm</classpathDependencyExcludes>
+							</classpathDependencyExcludes>
+
+							<!-- List out all classes which you need for unit testing. -->
+							<includes>
+								<include>**/*Tests.java</include>
+							</includes>
+
+							<!-- Below properties are required for jacoco to work. -->
+							<systemPropertyVariables>
+								<java.awt.headless>true</java.awt.headless>
+								<org.apache.activemq.default.directory.prefix>target/test/</org.apache.activemq.default.directory.prefix>
+								<jacoco.agent>${jacoco.agent}</jacoco.agent>
+							</systemPropertyVariables>
+						</configuration>
+					</plugin>
+					<!-- This plugin is added for future extension -->
+					<plugin>
+						<groupId>org.jboss.shrinkwrap.resolver</groupId>
+						<artifactId>shrinkwrap-resolver-maven-plugin</artifactId>
+						<version>2.0.0</version>
+						<executions>
+							<execution>
+								<goals>
+									<goal>propagate-execution-context</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<!-- Below plugin is required for code coverage to work -->
+					<plugin>
+						<groupId>org.jacoco</groupId>
+						<artifactId>jacoco-maven-plugin</artifactId>
+						<version>${jacoco.version}</version>
+						<configuration>
+							<dumpOnExit>true</dumpOnExit>
+							<excludes>
+								<exclude>org.jboss.arquillian.*</exclude>
+							</excludes>
+							<fileSets>
+								<fileSet implementation="org.apache.maven.shared.model.fileset.FileSet">
+									<directory>${project.build.directory}/</directory>
+									<includes>
+										<include>**/jacocoarq.exec</include>
+										<include>**/jacocopojo.exec</include>
+									</includes>
+								</fileSet>
+							</fileSets>
+						</configuration>
+						<executions>
+							<!-- Below execution sets surefireArgLine which is used by maven-surefire-plugin. -->
+							<execution>
+								<id>pre-unit-test</id>
+								<goals>
+									<goal>prepare-agent</goal>
+								</goals>
+								<configuration>
+									<destFile>${jacoco.ut.execution.data.file}</destFile>
+									<propertyName>surefireArgLine</propertyName>
+								</configuration>
+							</execution>
+
+							<!-- Below execution sets jacoco.agent which is used by maven-surefire-plugin 
+								and then is used for arquillian. -->
+							<execution>
+								<id>jacoco-prepare</id>
+								<phase>validate</phase>
+								<goals>
+									<goal>prepare-agent</goal>
+								</goals>
+								<configuration>
+									<destFile>${jacoco.ut.execution.data.file.2}</destFile>
+									<propertyName>jacoco.agent</propertyName>
+									<excludes>
+										<!-- <exclude>org.jboss.arquillian.*</exclude> -->
+										<exclude>com.*</exclude>
+										<exclude>model.*</exclude>
+										<exclude>net.*</exclude>
+										<exclude>org.*</exclude>
+										<!-- <exclude>**/lib/*</exclude> -->
+									</excludes>
+								</configuration>
+							</execution>
+
+							<!-- Below execution sets data files and output directory for jacoco 
+								reports.. -->
+							<execution>
+								<id>post-unit-test</id>
+								<phase>test</phase>
+								<goals>
+									<goal>report</goal>
+								</goals>
+								<configuration>
+									<!-- Sets the path to the file which contains the execution data. -->
+									<dataFile>${jacoco.ut.execution.data.file}</dataFile>
+									<destFile>${jacoco.ut.execution.data.file}</destFile>
+									<!-- Sets the output directory for the code coverage report. -->
+									<outputDirectory>${project.reporting.outputDirectory}/jacoco-ut</outputDirectory>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+
+					<!-- Below plugin is required for Unit Test results reporting. Report 
+						generated can be sent over email -->
+					<plugin>
+						<!-- Extended Maven antrun plugin -->
+						<!-- https://maven-antrun-extended-plugin.dev.java.net/ -->
+						<groupId>org.jvnet.maven-antrun-extended-plugin</groupId>
+						<artifactId>maven-antrun-extended-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>test-reports</id>
+								<phase>test</phase>
+								<configuration>
+									<tasks>
+										<junitreport todir="target/surefire-reports">
+											<fileset dir="target/surefire-reports">
+												<include name="**/*.xml" />
+											</fileset>
+											<report format="noframes" todir="target/surefire-reports" />
+										</junitreport>
+									</tasks>
+								</configuration>
+								<goals>
+									<goal>run</goal>
+								</goals>
+							</execution>
+						</executions>
+						<dependencies>
+							<dependency>
+								<groupId>org.apache.ant</groupId>
+								<artifactId>ant-junit</artifactId>
+								<version>1.8.0</version>
+							</dependency>
+							<dependency>
+								<groupId>org.apache.ant</groupId>
+								<artifactId>ant-trax</artifactId>
+								<version>1.8.0</version>
+							</dependency>
+						</dependencies>
+					</plugin>
+				</plugins>
+			</build>
+			<dependencies>
+				<!-- This is mendatory for code coverage to work for arquillian test 
+					cases -->
+				<dependency>
+					<groupId>org.jboss.arquillian.extension</groupId>
+					<artifactId>arquillian-jacoco</artifactId>
+					<scope>test</scope>
+					<version>1.0.0.Alpha8</version>
+				</dependency>
+				<!-- This dependancy is mendatory for jacoco code coverage -->
+				<dependency>
+					<groupId>org.jacoco</groupId>
+					<artifactId>org.jacoco.core</artifactId>
+					<version>${jacoco.version}</version>
+				</dependency>
+				<dependency>
+					<groupId>org.apache.maven.surefire</groupId>
+					<artifactId>surefire-junit47</artifactId>
+					<version>2.20</version>
+				</dependency>
+				<dependency>
+					<groupId>org.jboss.as</groupId>
+					<artifactId>jboss-as-arquillian-container-managed</artifactId>
+					<scope>test</scope>
+				</dependency>
+			</dependencies>
+		</profile>
+
+
+
+		<!-- Author : Dhaval Patel Description : Below profile is intended for 
+			execution on jenkins, it includes just base unit testing features. Sample 
+			maven command : mvn clean test -Punit-testing-light -->
+		<profile>
+			<id>unit-testing-light</id>
+			<build>
+				<plugins>
+
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-dependency-plugin</artifactId>
+						<version>3.0.2</version>
+						<executions>
+							<execution>
+								<id>copy</id>
+								<phase>package</phase>
+								<goals>
+									<goal>copy</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>com.edb</groupId>
+									<artifactId>edb</artifactId>
+									<version>1.0</version>
+									<scope>system</scope>
+									<systemPath>${basedir}/libs/edb-jdbc18.jar</systemPath>
+									<type>jar</type>
+									<overWrite>true</overWrite>
+									<outputDirectory>${project.build.directory}/test-classes/jboss/modules/com/oracle/ojdbc/main</outputDirectory>
+									<destFileName>ojdbc.jar</destFileName>
+								</artifactItem>
+							</artifactItems>
+							<outputDirectory>${project.build.directory}/test-classes/jboss/modules/com/oracle/ojdbc/main</outputDirectory>
+							<overWriteReleases>false</overWriteReleases>
+							<overWriteSnapshots>true</overWriteSnapshots>
+						</configuration>
+					</plugin>
+
+
+					<!-- Below plugin downloads jboss as as dependancy. -->
+					<plugin>
+						<artifactId>maven-dependency-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>unpack</id>
+								<phase>process-test-classes</phase>
+								<goals>
+									<goal>unpack</goal>
+								</goals>
+								<configuration>
+									<artifactItems>
+										<artifactItem>
+											<groupId>org.jboss.as</groupId>
+											<artifactId>jboss-as-dist</artifactId>
+											<version>7.5.7.Final-redhat-3</version>
+											<type>zip</type>
+											<overWrite>false</overWrite>
+											<outputDirectory>${basedir}/target</outputDirectory>
+										</artifactItem>
+									</artifactItems>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+
+					<!-- Below plugin copies jboss configuration files such as standalone.xml. -->
+					<plugin>
+						<artifactId>maven-resources-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>copy-resources</id>
+								<phase>process-test-classes</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${basedir}/target/jboss-eap-6.4</outputDirectory>
+									<overwrite>true</overwrite>
+									<resources>
+										<resource>
+											<directory>${basedir}/src/test/resources/jboss</directory>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<!-- This plugin is mendatory for unit test cases to run. Here you can 
+						specify which classes to run. -->
+					<plugin>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<version>2.20</version>
+						<configuration>
+							<forkCount>3</forkCount>
+							<reuseForks>true</reuseForks>
+							<argLine>-Xmx1024m</argLine>
+							<skip>false</skip>
+							<!-- List out all classes which you need for unit testing. -->
+							<includes>
+								<include>com.edb.samples.test.ApplicationTests</include>
+							</includes>
+
+							<systemPropertyVariables>
+								<java.awt.headless>true</java.awt.headless>
+								<org.apache.activemq.default.directory.prefix>target/test/</org.apache.activemq.default.directory.prefix>
+								<jacoco.agent></jacoco.agent>
+							</systemPropertyVariables>
+
+						</configuration>
+					</plugin>
+					<!-- This plugin is added for future extension -->
+					<plugin>
+						<groupId>org.jboss.shrinkwrap.resolver</groupId>
+						<artifactId>shrinkwrap-resolver-maven-plugin</artifactId>
+						<version>2.0.0</version>
+						<executions>
+							<execution>
+								<goals>
+									<goal>propagate-execution-context</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+			<dependencies>
+				<dependency>
+					<groupId>org.apache.maven.surefire</groupId>
+					<artifactId>surefire-junit47</artifactId>
+					<version>2.20</version>
+				</dependency>
+				<dependency>
+					<groupId>org.jboss.as</groupId>
+					<artifactId>jboss-as-arquillian-container-managed</artifactId>
+					<scope>test</scope>
+				</dependency>
+			</dependencies>
+		</profile>
+
+
+		<!-- Author : Dhaval Patel Description : Below profile is intended for 
+			execution on developer machine, it dosent include code coverage , reporting 
+			and download jboss as features. Sample maven command : mvn clean test -Plocal-unit-testing -->
+		<profile>
+			<id>local-unit-testing</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<version>2.20</version>
+						<configuration>
+							<forkCount>3</forkCount>
+							<reuseForks>true</reuseForks>
+							<argLine>-Xmx1024m</argLine>
+							<skip>false</skip>
+							<includes>
+								<include>com.edb.samples.test.ApplicationTests</include>
+							</includes>
+							<systemPropertyVariables>
+								<java.awt.headless>true</java.awt.headless>
+								<org.apache.activemq.default.directory.prefix>target/test/</org.apache.activemq.default.directory.prefix>
+								<jacoco.agent></jacoco.agent>
+							</systemPropertyVariables>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+			<dependencies>
+				<dependency>
+					<groupId>org.apache.maven.surefire</groupId>
+					<artifactId>surefire-junit47</artifactId>
+					<version>2.20</version>
+				</dependency>
+				<dependency>
+					<groupId>org.jboss.as</groupId>
+					<artifactId>jboss-as-arquillian-container-remote</artifactId>
+					<scope>test</scope>
+				</dependency>
+				<!-- This dependancy has been added for JRebel Implementation with JUnit -->
+				<!-- <dependency> <groupId>org.jboss.arquillian.extension</groupId> <artifactId>arquillian-jrebel-impl</artifactId> 
+					<version>1.0.0.Alpha1</version> <scope>test</scope> </dependency> -->
+			</dependencies>
+		</profile>
+	</profiles>
+</project>
