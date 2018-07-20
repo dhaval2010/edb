@@ -50,6 +50,8 @@ Perform below steps for using the example:
 	Create sequence as : EMAIL_ID_SEQ
 
 5. Start the JBOSS server  (run standalone server i.e. bin/standalone.bat)
-
-3. Go to root dir of project and exec below command:
+6. Install maven 3.2.3
+7. Add settings.xml file present in project to conf folder of maven
+8. Make sure you have JAVA_HOME and PATH set to java8 environment
+9. Go to root dir of project and exec below command:
    mvn clean test -Plocal-unit-testing -U
