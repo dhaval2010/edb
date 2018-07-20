@@ -243,7 +243,7 @@
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-annotations</artifactId>
-			<version>3.5.6-FINAL</version>
+			<version>3.5.6-Final</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.hibernate</groupId>
