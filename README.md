@@ -30,6 +30,8 @@ Perform below steps for using the example:
             </datasources>
 
       Ensure to update URL ,USER  and PWD.
+      
+      Also ensure to add com.edb.ojdbc module with edb jdbc jar.
 4. Create below table in DB
 
 	CREATE TABLE email
