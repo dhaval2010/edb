@@ -1,7 +1,7 @@
 Perform below steps for using the example:
 
 1. Clone https://github.com/dhaval2010/edb.git  into your local
-2. Make sure you have JBOSS EAP 6.4 server on your local
+2. Make sure you have JBOSS EAP 6.4 server on your local.
 3. Add datasource in standalone.xml file as below:
            JBOSS_6.4\standalone\configuration\standalone.xml
           
