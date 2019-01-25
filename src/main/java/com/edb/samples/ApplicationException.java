@@ -14,6 +14,7 @@ public class ApplicationException extends Exception implements Serializable {
 	private String errorMessage;
 
 	private String errorNumber;
+	private String message;
 
 	public ApplicationException(final Throwable cause) {
 		super(cause);
