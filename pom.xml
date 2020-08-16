@@ -210,7 +210,7 @@
 		<dependency>
 			<groupId>org.owasp.antisamy</groupId>
 			<artifactId>antisamy</artifactId>
-			<version>1.5.3</version>
+			<version>1.5.5</version>
 		</dependency>
 
 		<dependency>
@@ -706,9 +706,9 @@
 									<tasks>
 										<junitreport todir="target/surefire-reports">
 											<fileset dir="target/surefire-reports">
-												<include name="**/*.xml" />
+												<include name="**/*.xml"/>
 											</fileset>
-											<report format="noframes" todir="target/surefire-reports" />
+											<report format="noframes" todir="target/surefire-reports"/>
 										</junitreport>
 									</tasks>
 								</configuration>
@@ -870,7 +870,7 @@
 							<systemPropertyVariables>
 								<java.awt.headless>true</java.awt.headless>
 								<org.apache.activemq.default.directory.prefix>target/test/</org.apache.activemq.default.directory.prefix>
-								<jacoco.agent></jacoco.agent>
+								<jacoco.agent/>
 							</systemPropertyVariables>
 
 						</configuration>
@@ -927,7 +927,7 @@
 							<systemPropertyVariables>
 								<java.awt.headless>true</java.awt.headless>
 								<org.apache.activemq.default.directory.prefix>target/test/</org.apache.activemq.default.directory.prefix>
-								<jacoco.agent></jacoco.agent>
+								<jacoco.agent/>
 							</systemPropertyVariables>
 						</configuration>
 					</plugin>
