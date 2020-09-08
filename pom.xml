@@ -20,7 +20,7 @@
 		<version.war.plugin>2.1.1</version.war.plugin>
 		<!-- Added N -->
 		<version.infinispan>5.2.7.Final</version.infinispan>
-		<cxf.version>2.7.12</cxf.version>
+		<cxf.version>3.2.12</cxf.version>
 		<!-- maven-compiler-plugin -->
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<maven.compiler.source>1.8</maven.compiler.source>
@@ -706,9 +706,9 @@
 									<tasks>
 										<junitreport todir="target/surefire-reports">
 											<fileset dir="target/surefire-reports">
-												<include name="**/*.xml" />
+												<include name="**/*.xml"/>
 											</fileset>
-											<report format="noframes" todir="target/surefire-reports" />
+											<report format="noframes" todir="target/surefire-reports"/>
 										</junitreport>
 									</tasks>
 								</configuration>
@@ -870,7 +870,7 @@
 							<systemPropertyVariables>
 								<java.awt.headless>true</java.awt.headless>
 								<org.apache.activemq.default.directory.prefix>target/test/</org.apache.activemq.default.directory.prefix>
-								<jacoco.agent></jacoco.agent>
+								<jacoco.agent/>
 							</systemPropertyVariables>
 
 						</configuration>
@@ -927,7 +927,7 @@
 							<systemPropertyVariables>
 								<java.awt.headless>true</java.awt.headless>
 								<org.apache.activemq.default.directory.prefix>target/test/</org.apache.activemq.default.directory.prefix>
-								<jacoco.agent></jacoco.agent>
+								<jacoco.agent/>
 							</systemPropertyVariables>
 						</configuration>
 					</plugin>
